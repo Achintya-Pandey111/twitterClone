@@ -3,7 +3,8 @@ import {testTweets as someTweets} from "../tweets.js"
 const Feed = () => {
   const [tweets, setTweets] = useState(someTweets);
   const [input, setInput] = useState("");
-  
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyInput, setReplyInput] = useState("");
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('x-posts')) || tweets;
@@ -18,6 +19,10 @@ const Feed = () => {
       user: localStorage.getItem('userName') || "Sarthak Shringi",
       handle: localStorage.getItem('userHandle') || "@SarthakShr11450",
       text: input,
+      replies: [],
+      likes: 0,
+      retweets: 0,
+      timestamp: new Date().toISOString(),
     };
 
     const updated = [newTweet, ...tweets];
@@ -25,19 +30,41 @@ const Feed = () => {
     localStorage.setItem('x-posts', JSON.stringify(updated));
     setInput("");
   };
-  const handleLike = (id) => {
-  const updated = tweets.map(t => 
-    t.id === id ? { ...t, likes: (t.likes || 0) + 1 } : t
-  );
-  setTweets(updated);
-  localStorage.setItem('x-posts', JSON.stringify(updated));
-};
 
-const deleteTweet = (id) => {
-  const updated = tweets.filter(t => t.id !== id);
-  setTweets(updated);
-  localStorage.setItem('x-posts', JSON.stringify(updated));
-};
+  const handleLike = (id) => {
+    const updated = tweets.map(t => 
+      t.id === id ? { ...t, likes: (t.likes || 0) + 1 } : t
+    );
+    setTweets(updated);
+    localStorage.setItem('x-posts', JSON.stringify(updated));
+  };
+
+  const handleReply = (tweetId) => {
+    if (!replyInput.trim()) return;
+
+    const reply = {
+      id: crypto.randomUUID(),
+      user: localStorage.getItem('userName') || "Sarthak Shringi",
+      handle: localStorage.getItem('userHandle') || "@SarthakShr11450",
+      text: replyInput,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updated = tweets.map(t => 
+      t.id === tweetId ? { ...t, replies: [...(t.replies || []), reply] } : t
+    );
+
+    setTweets(updated);
+    localStorage.setItem('x-posts', JSON.stringify(updated));
+    setReplyInput("");
+    setReplyingTo(null);
+  };
+
+  const deleteTweet = (id) => {
+    const updated = tweets.filter(t => t.id !== id);
+    setTweets(updated);
+    localStorage.setItem('x-posts', JSON.stringify(updated));
+  };
 
   return (
     <div className="feed">
@@ -57,34 +84,58 @@ const deleteTweet = (id) => {
 
       <div className="tweets-container">
         {tweets.map(tweet => (
-  <div key={tweet.id} className="tweet-postcard">
-    <div className="avatar-circle">{tweet.user.charAt(0)}</div>
-    <div className="tweet-main">
-      <div className="tweet-user-details" style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <div>
-          <span className="user-bold">{tweet.user}</span>
-          <span className="handle-gray">{tweet.handle} · 1m</span>
-        </div>
-        {/* Delete Button */}
-        <button 
-          onClick={() => deleteTweet(tweet.id)} 
-          style={{ backgroundColor: '#1d9bf0', border: 'none', borderRadius:'10px' , color: 'white', cursor: 'pointer' }}
-        >
-          Delete Post
-        </button>
-      </div>
-      <p className="tweet-body-text">{tweet.text}</p>
-      <div className="tweet-actions-row">
-        <span>💬 0</span> 
-        <span>🔁 0</span> 
-        <span onClick={() => handleLike(tweet.id)} style={{ cursor: 'pointer' }}>
-          ❤️ {tweet.likes || 0}
-        </span> 
-        <span>📊 0</span>
-      </div>
-    </div>
-  </div>
-))}
+          <div key={tweet.id} className="tweet-postcard">
+            <div className="avatar-circle">{tweet.user.charAt(0)}</div>
+            <div className="tweet-main">
+              <div className="tweet-user-details" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <span className="user-bold">{tweet.user}</span>
+                  <span className="handle-gray">{tweet.handle} · 1m</span>
+                </div>
+                <button 
+                  onClick={() => deleteTweet(tweet.id)} 
+                  style={{ backgroundColor: '#1d9bf0', border: 'none', borderRadius:'10px' , color: 'white', cursor: 'pointer', padding: '4px 8px' }}
+                >
+                  Delete
+                </button>
+              </div>
+              <p className="tweet-body-text">{tweet.text}</p>
+              <div className="tweet-actions-row">
+                <span onClick={() => setReplyingTo(replyingTo === tweet.id ? null : tweet.id)} style={{ cursor: 'pointer' }}>
+                  💬 {tweet.replies?.length || 0}
+                </span> 
+                <span>🔁 {tweet.retweets || 0}</span> 
+                <span onClick={() => handleLike(tweet.id)} style={{ cursor: 'pointer' }}>
+                  ❤️ {tweet.likes || 0}
+                </span> 
+                <span>📊 0</span>
+              </div>
+
+              {replyingTo === tweet.id && (
+                <div className="reply-input-box" style={{ marginTop: '10px' }}>
+                  <input 
+                    value={replyInput}
+                    onChange={(e) => setReplyInput(e.target.value)}
+                    placeholder="Post your reply"
+                    style={{ width: '80%', padding: '5px', borderRadius: '5px', border: '1px solid #ccc' }}
+                  />
+                  <button onClick={() => handleReply(tweet.id)} className="post-btn-small" style={{ marginLeft: '5px' }}>Reply</button>
+                </div>
+              )}
+
+              {tweet.replies?.length > 0 && (
+                <div className="replies-container" style={{ marginLeft: '20px', borderLeft: '1px solid #333', paddingLeft: '10px', marginTop: '10px' }}>
+                  {tweet.replies.map(reply => (
+                    <div key={reply.id} className="reply-item" style={{ marginBottom: '5px', fontSize: '0.9em' }}>
+                      <span className="user-bold" style={{ fontSize: '0.85em' }}>{reply.user}</span>
+                      <p className="tweet-body-text" style={{ fontSize: '0.9em', margin: '2px 0' }}>{reply.text}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
