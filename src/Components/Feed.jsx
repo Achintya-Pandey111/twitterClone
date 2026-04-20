@@ -14,7 +14,7 @@ const Feed = () => {
     if (!input.trim() || tweets.length >= MAX_POSTS) return;
 
     const newTweet = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       user: localStorage.getItem('userName') || "Sarthak Shringi",
       handle: localStorage.getItem('userHandle') || "@SarthakShr11450",
       text: input,
@@ -41,13 +41,10 @@ const deleteTweet = (id) => {
 
   return (
     <div className="feed">
-      <div className="storage-info">
-        Posts: {tweets.length} / {MAX_POSTS} (Local Storage Limit)
-      </div>
-      
-      <header className="feed-header">
-        <h2>Home</h2>
-      </header>
+      <div className="topHead">
+        <div className='ForYou'>For you</div>
+        <div className='Following'>Following</div>
+      </div>      
 
       <div className="tweet-input-section">
         <input 
