@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
-
+import {testTweets as someTweets} from "../tweets.js"
 const Feed = () => {
-  const [tweets, setTweets] = useState([]);
+  const [tweets, setTweets] = useState(someTweets);
   const [input, setInput] = useState("");
-  const MAX_POSTS = 10;
+  
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('x-posts')) || [];
+    const saved = JSON.parse(localStorage.getItem('x-posts')) || tweets;
     setTweets(saved);
   }, []);
 
   const handlePost = () => {
-    if (!input.trim() || tweets.length >= MAX_POSTS) return;
+    if (!input.trim()) return
 
     const newTweet = {
       id: crypto.randomUUID(),
@@ -68,9 +68,9 @@ const deleteTweet = (id) => {
         {/* Delete Button */}
         <button 
           onClick={() => deleteTweet(tweet.id)} 
-          style={{ background: 'none', border: 'none', color: '#71767b', cursor: 'pointer' }}
+          style={{ backgroundColor: '#1d9bf0', border: 'none', borderRadius:'10px' , color: 'white', cursor: 'pointer' }}
         >
-          ✕
+          Delete Post
         </button>
       </div>
       <p className="tweet-body-text">{tweet.text}</p>
