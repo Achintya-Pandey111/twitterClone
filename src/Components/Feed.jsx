@@ -55,10 +55,27 @@ const Feed = () => {
     localStorage.setItem('x-posts', JSON.stringify(updated));
   };
 
+  const [likedTweets, setLikedTweets] = useState(new Set());
+  const [animatingLike, setAnimatingLike] = useState(null);
+
   const handleLike = (id) => {
+    const isLiked = likedTweets.has(id);
     const updated = tweets.map(t => 
-      t.id === id ? { ...t, likes: (t.likes || 0) + 1 } : t
+      t.id === id ? { ...t, likes: isLiked ? (t.likes || 1) - 1 : (t.likes || 0) + 1 } : t
     );
+    
+    if (!isLiked) {
+      setAnimatingLike(id);
+      setTimeout(() => setAnimatingLike(null), 300);
+      setLikedTweets(prev => new Set(prev).add(id));
+    } else {
+      setLikedTweets(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+
     setTweets(updated);
     localStorage.setItem('x-posts', JSON.stringify(updated));
   };
@@ -138,8 +155,12 @@ const Feed = () => {
                     <span onClick={() => handleRepost(tweet)} style={{ cursor: 'pointer' }}>
                       🔁 {tweet.retweets || 0}
                     </span> 
-                    <span onClick={() => handleLike(tweet.id)} style={{ cursor: 'pointer' }}>
-                      ❤️ {tweet.likes || 0}
+                    <span 
+                      onClick={() => handleLike(tweet.id)} 
+                      style={{ cursor: 'pointer' }}
+                      className={`${likedTweets.has(tweet.id) ? 'liked' : ''} ${animatingLike === tweet.id ? 'like-animated' : ''}`}
+                    >
+                      {likedTweets.has(tweet.id) ? '❤️' : '🤍'} {tweet.likes || 0}
                     </span> 
                     <span>📊 0</span>
                   </div>
