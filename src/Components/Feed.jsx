@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import {testTweets as someTweets} from "../tweets.js"
+import Skeleton from './Skeleton';
+
 const Feed = () => {
-  const [tweets, setTweets] = useState(someTweets);
+  const [tweets, setTweets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyInput, setReplyInput] = useState("");
 
   useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem('x-posts')) || tweets;
-    setTweets(saved);
+    const timer = setTimeout(() => {
+      const saved = JSON.parse(localStorage.getItem('x-posts')) || someTweets;
+      setTweets(saved);
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   const handlePost = () => {
@@ -124,7 +131,14 @@ const Feed = () => {
       </div>
 
       <div className="tweets-container">
-        {tweets.map(tweet => (
+        {loading ? (
+          <>
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+          </>
+        ) : (
+          tweets.map(tweet => (
           <div key={tweet.id} className="tweet-postcard">
             <div className="tweet-main-content">
               {tweet.isRepost && (
@@ -198,7 +212,8 @@ const Feed = () => {
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
