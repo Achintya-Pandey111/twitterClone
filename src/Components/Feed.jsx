@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {testTweets as someTweets} from "../tweets.js"
 import Skeleton from './Skeleton';
+import { timeAgo } from '../utils.js';
 
 const Feed = () => {
   const [tweets, setTweets] = useState([]);
@@ -8,6 +9,7 @@ const Feed = () => {
   const [input, setInput] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyInput, setReplyInput] = useState("");
+  const MAX_CHARS = 280;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,7 +21,7 @@ const Feed = () => {
   }, []);
 
   const handlePost = () => {
-    if (!input.trim()) return
+    if (!input.trim() || input.length > MAX_CHARS) return
 
     const newTweet = {
       id: crypto.randomUUID(),
@@ -127,7 +129,19 @@ const Feed = () => {
           onChange={(e) => setInput(e.target.value)} 
           placeholder="What's happening?" 
         />
-        <button onClick={handlePost} className="post-btn-small">Post</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '12px', color: input.length > MAX_CHARS ? 'red' : '#71767b' }}>
+            {input.length}/{MAX_CHARS}
+          </span>
+          <button 
+            disabled={!input.trim() || input.length > MAX_CHARS}
+            onClick={handlePost} 
+            className="post-btn-small"
+            style={{ opacity: (!input.trim() || input.length > MAX_CHARS) ? 0.5 : 1 }}
+          >
+            Post
+          </button>
+        </div>
       </div>
 
       <div className="tweets-container">
@@ -152,7 +166,7 @@ const Feed = () => {
                   <div className="tweet-user-details" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
                       <span className="user-bold">{tweet.user}</span>
-                      <span className="handle-gray">{tweet.handle} · 1m</span>
+                      <span className="handle-gray">{tweet.handle} · {tweet.timestamp ? timeAgo(tweet.timestamp) : '1m'}</span>
                     </div>
                     <button 
                       onClick={() => deleteTweet(tweet.id)} 
