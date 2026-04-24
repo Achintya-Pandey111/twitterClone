@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import {testTweets as someTweets} from "../tweets.js"
 import Skeleton from './Skeleton';
 import { timeAgo } from '../utils.js';
+import DeleteModal from './DeleteModal';
 
 const Feed = () => {
   const [tweets, setTweets] = useState([]);
@@ -9,6 +10,7 @@ const Feed = () => {
   const [input, setInput] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
   const [replyInput, setReplyInput] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(null); // stores tweet ID to delete
   const MAX_CHARS = 280;
 
   useEffect(() => {
@@ -111,13 +113,23 @@ const Feed = () => {
   };
 
   const deleteTweet = (id) => {
-    const updated = tweets.filter(t => t.id !== id);
+    setShowDeleteModal(id);
+  };
+
+  const handleConfirmDelete = () => {
+    const updated = tweets.filter(t => t.id !== showDeleteModal);
     setTweets(updated);
     localStorage.setItem('x-posts', JSON.stringify(updated));
+    setShowDeleteModal(null);
   };
 
   return (
     <div className="feed">
+      <DeleteModal 
+        isOpen={!!showDeleteModal} 
+        onCancel={() => setShowDeleteModal(null)} 
+        onConfirm={handleConfirmDelete} 
+      />
       <div className="topHead">
         <div className='ForYou'>For you</div>
         <div className='Following'>Following</div>
