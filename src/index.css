@@ -1,3 +1,25 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #000000;
+  color: #e7e9ea;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  overflow-x: hidden;
+}
+
+.app-container {
+  display: flex;
+  justify-content: center;
+  max-width: 1300px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
 /* sidebar */
 .sidebar {
   width: 275px;
@@ -118,7 +140,7 @@
   font-size: 14px;
 }
 
-/* ========== FEED ========== */
+/* feed */
 .feed {
   width: 600px;
   border-left: 1px solid #2f3336;
@@ -321,7 +343,7 @@
   color: #f4212e;
 }
 
-/* widget */
+/* ========== WIDGETS ========== */
 .widgets {
   width: 350px;
   padding: 16px 20px;
